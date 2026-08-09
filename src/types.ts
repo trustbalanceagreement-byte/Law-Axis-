@@ -100,13 +100,15 @@ export interface ChatMessage {
 
 export interface AppNotification {
   id: string;
-  userId: string;
+  recipientRole: 'user' | 'lawyer';
+  recipientId?: string;
   title: string;
   message: string;
   timestamp: string;
   isRead: boolean;
   appointmentId?: string;
   lawyerName?: string;
+  userName?: string;
 }
 
 export interface UserProfileData {

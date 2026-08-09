@@ -56,8 +56,8 @@ interface AppContextType {
   conversations: Conversation[];
   messages: Record<string, ChatMessage[]>;
   notifications: AppNotification[];
-  clearAllNotifications: () => void;
-  markNotificationsAsRead: () => void;
+  clearAllNotifications: (forRole?: 'user' | 'lawyer', recipientId?: string) => void;
+  markNotificationsAsRead: (forRole?: 'user' | 'lawyer', recipientId?: string) => void;
   addNotification: (notif: Omit<AppNotification, 'id' | 'timestamp' | 'isRead'>) => void;
 
   // Selected lawyer for profile detail modal view
@@ -189,7 +189,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     const saved = localStorage.getItem('low_axis_v5_notifications');
-    return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
+    const raw: AppNotification[] = saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
+    // Deduplicate by recipientRole, recipientId, appointmentId, message
+    const unique: AppNotification[] = [];
+    for (const item of raw) {
+      const exists = unique.some(
+        (u) =>
+          u.recipientRole === item.recipientRole &&
+          u.recipientId === item.recipientId &&
+          u.appointmentId === item.appointmentId &&
+          u.message === item.message
+      );
+      if (!exists) unique.push(item);
+    }
+    return unique;
   });
 
   const [bookmarkedLawyerIds, setBookmarkedLawyerIds] = useState<string[]>(() => {
@@ -238,22 +251,78 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('low_axis_v3_bookmarks', JSON.stringify(bookmarkedLawyerIds));
   }, [bookmarkedLawyerIds]);
 
-  const clearAllNotifications = () => {
-    setNotifications([]);
+  const clearAllNotifications = (forRole?: 'user' | 'lawyer', recipientId?: string) => {
+    setNotifications((prev) =>
+      prev.filter((n) => {
+        if (!forRole) return false;
+        if (n.recipientRole !== forRole) return true;
+        if (recipientId && n.recipientId && n.recipientId !== recipientId) return true;
+        return false;
+      })
+    );
   };
 
-  const markNotificationsAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  const markNotificationsAsRead = (forRole?: 'user' | 'lawyer', recipientId?: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => {
+        if (forRole && n.recipientRole !== forRole) return n;
+        if (recipientId && n.recipientId && n.recipientId !== recipientId) return n;
+        return { ...n, isRead: true };
+      })
+    );
+  };
+
+  const formatAppointmentDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    if (/[a-zA-Z]/.test(dateStr)) return dateStr;
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parts[0];
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const day = parts[2];
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      if (monthNames[monthIdx]) {
+        return `${day} ${monthNames[monthIdx]} ${year}`;
+      }
+    }
+    return dateStr;
+  };
+
+  const getFormattedNow = () => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = monthNames[now.getMonth()];
+    const year = now.getFullYear();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const strHours = String(hours).padStart(2, '0');
+    return `${day} ${month} ${year}, ${strHours}:${minutes} ${ampm}`;
   };
 
   const addNotification = (notif: Omit<AppNotification, 'id' | 'timestamp' | 'isRead'>) => {
-    const newNotif: AppNotification = {
-      ...notif,
-      id: `notif-${Date.now()}`,
-      timestamp: 'Just now',
-      isRead: false,
-    };
-    setNotifications((prev) => [newNotif, ...prev]);
+    setNotifications((prev) => {
+      // Deduplicate: check if an identical notification already exists
+      const isDuplicate = prev.some(
+        (n) =>
+          n.recipientRole === notif.recipientRole &&
+          n.recipientId === notif.recipientId &&
+          n.appointmentId === notif.appointmentId &&
+          n.message === notif.message
+      );
+      if (isDuplicate) return prev;
+
+      const newNotif: AppNotification = {
+        ...notif,
+        id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        timestamp: getFormattedNow(),
+        isRead: false,
+      };
+      return [newNotif, ...prev];
+    });
   };
 
   // Bookmark toggle
@@ -302,6 +371,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setAppointments((prev) => [newApp, ...prev]);
 
+    const formattedDate = formatAppointmentDate(data.date);
+
+    // Send notification specifically to the target LAWYER
+    addNotification({
+      recipientRole: 'lawyer',
+      recipientId: data.lawyer.id,
+      title: 'New Appointment Booking',
+      message: `${newApp.userName} has booked a new consultation appointment for ${formattedDate} at ${data.timeSlot}.`,
+      appointmentId: newApp.id,
+      userName: newApp.userName,
+      lawyerName: data.lawyer.name,
+    });
+
     // Also start a chat thread if not exists
     startConversationWithLawyer(data.lawyer);
 
@@ -310,23 +392,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Update appointment status
   const updateAppointmentStatus = (id: string, status: AppointmentStatus) => {
-    setAppointments((prev) => {
-      return prev.map((app) => {
-        if (app.id === id) {
-          if (status === 'confirmed') {
-            addNotification({
-              userId: app.userId,
-              lawyerName: app.lawyerName,
-              title: 'অ্যাপয়েন্টমেন্ট কনফার্মেশন (Appointment Confirmed)',
-              message: `${app.lawyerName} আপনার অ্যাপয়েন্টমেন্ট বুকিং (${app.date}, ${app.timeSlot}) সফলভাবে কনফার্ম করেছেন।`,
-              appointmentId: app.id,
-            });
-          }
-          return { ...app, status };
-        }
-        return app;
+    const targetApp = appointments.find((a) => a.id === id);
+    if (targetApp && status === 'confirmed' && targetApp.status !== 'confirmed') {
+      const formattedDate = formatAppointmentDate(targetApp.date);
+      // Send notification specifically to the USER
+      addNotification({
+        recipientRole: 'user',
+        recipientId: targetApp.userId,
+        title: 'Appointment Confirmed',
+        message: `${targetApp.lawyerName} has successfully confirmed your appointment booking for ${formattedDate} at ${targetApp.timeSlot}.`,
+        appointmentId: targetApp.id,
+        lawyerName: targetApp.lawyerName,
+        userName: targetApp.userName,
       });
-    });
+    }
+
+    setAppointments((prev) =>
+      prev.map((app) => (app.id === id ? { ...app, status } : app))
+    );
   };
 
   // Submit Review & update Lawyer Rating

@@ -21,20 +21,30 @@ export const Header: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const currentLawyer = lawyers.find((l) => l.id === currentLawyerId) || lawyers[0];
-  const avatar = role === 'lawyer' ? currentLawyer?.avatar : userProfile?.avatar;
-  const displayName = role === 'lawyer' ? currentLawyer?.name : userProfile?.name;
+  const activeRole = role || 'user';
+  const currentRecipientId = activeRole === 'lawyer' ? currentLawyerId : userProfile?.id || 'user-001';
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const avatar = activeRole === 'lawyer' ? currentLawyer?.avatar : userProfile?.avatar;
+  const displayName = activeRole === 'lawyer' ? currentLawyer?.name : userProfile?.name;
+
+  // Filter notifications strictly for the active role & active recipient
+  const filteredNotifications = notifications.filter((n) => {
+    if (n.recipientRole !== activeRole) return false;
+    if (n.recipientId && currentRecipientId && n.recipientId !== currentRecipientId) return false;
+    return true;
+  });
+
+  const unreadCount = filteredNotifications.filter((n) => !n.isRead).length;
 
   const handleToggleNotifications = () => {
     if (!showNotifications) {
-      markNotificationsAsRead();
+      markNotificationsAsRead(activeRole, currentRecipientId);
     }
     setShowNotifications((prev) => !prev);
   };
 
   const handleClearAll = () => {
-    clearAllNotifications();
+    clearAllNotifications(activeRole, currentRecipientId);
   };
 
   // Close dropdown on click outside
@@ -97,41 +107,41 @@ export const Header: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Bell className="w-4 h-4 text-blue-400" />
                     <span className="font-bold text-sm">
-                      {t('নোটিফিকেশন', 'Notifications')}
+                      Notifications
                     </span>
-                    {notifications.length > 0 && (
+                    {filteredNotifications.length > 0 && (
                       <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
-                        {notifications.length}
+                        {filteredNotifications.length}
                       </span>
                     )}
                   </div>
 
-                  {notifications.length > 0 && (
+                  {filteredNotifications.length > 0 && (
                     <button
                       onClick={handleClearAll}
                       className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-900/60 px-2.5 py-1 rounded-lg border border-red-800/50 transition-colors font-medium cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>{t('সব মুছুন', 'Clear All')}</span>
+                      <span>Clear All</span>
                     </button>
                   )}
                 </div>
 
                 {/* Notifications List */}
                 <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                  {notifications.length === 0 ? (
+                  {filteredNotifications.length === 0 ? (
                     <div className="p-8 text-center text-slate-500 flex flex-col items-center justify-center gap-2">
                       <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                         <Bell className="w-5 h-5 text-slate-400" />
                       </div>
                       <p className="text-xs font-medium text-slate-600">
-                        {t('কোনো নতুন নোটিফিকেশন নেই', 'No notifications yet')}
+                        No notifications yet
                       </p>
                     </div>
                   ) : (
-                    notifications.map((notif) => (
+                    filteredNotifications.map((notif, idx) => (
                       <div
-                        key={notif.id}
+                        key={`${notif.id}-${idx}`}
                         className="p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start"
                       >
                         <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0 mt-0.5">
@@ -140,7 +150,7 @@ export const Header: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1 mb-0.5">
                             <span className="text-xs font-bold text-slate-900 truncate">
-                              {notif.lawyerName || notif.title}
+                              {notif.userName || notif.lawyerName || notif.title}
                             </span>
                             <span className="text-[10px] text-slate-400 shrink-0">
                               {notif.timestamp}
@@ -152,7 +162,11 @@ export const Header: React.FC = () => {
                           {notif.appointmentId && (
                             <div className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md w-fit">
                               <CalendarCheck className="w-3 h-3" />
-                              <span>{t('অ্যাপয়েন্টমেন্ট কনফার্মড', 'Appointment Confirmed')}</span>
+                              <span>
+                                {notif.recipientRole === 'lawyer'
+                                  ? 'New Appointment Booking'
+                                  : 'Appointment Confirmed'}
+                              </span>
                             </div>
                           )}
                         </div>

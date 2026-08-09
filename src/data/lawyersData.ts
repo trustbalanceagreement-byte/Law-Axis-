@@ -322,13 +322,25 @@ export const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {};
 export const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif-1',
-    userId: 'user-001',
+    recipientRole: 'user' as const,
+    recipientId: 'user-001',
     lawyerName: 'Advocate Amar Chakraborty',
-    title: 'অ্যাপয়েন্টমেন্ট কনফার্মেশন (Appointment Confirmed)',
-    message: 'Advocate Amar Chakraborty আপনার অ্যাপয়েন্টমেন্ট বুকিং (2026-08-12, 04:00 PM) সফলভাবে কনফার্ম করেছেন।',
-    timestamp: '10 mins ago',
+    title: 'Appointment Confirmed',
+    message: 'Advocate Amar Chakraborty has successfully confirmed your appointment booking for 12 Aug 2026 at 04:00 PM.',
+    timestamp: '12 Aug 2026, 04:00 PM',
     isRead: false,
     appointmentId: 'app-101',
+  },
+  {
+    id: 'notif-2',
+    recipientRole: 'lawyer' as const,
+    recipientId: 'lawyer-1',
+    userName: 'Karan Sharma',
+    title: 'New Appointment Booking',
+    message: 'Karan Sharma has booked a new consultation appointment for 14 Aug 2026 at 10:00 AM.',
+    timestamp: '12 Aug 2026, 03:45 PM',
+    isRead: false,
+    appointmentId: 'app-102',
   },
 ];
 
