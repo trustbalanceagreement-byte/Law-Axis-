@@ -174,9 +174,9 @@ export const LawyerDashboard: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {pendingApps.map((app) => (
+            {pendingApps.map((app, idx) => (
               <div
-                key={app.id}
+                key={`dash-app-${app.id || idx}-${idx}`}
                 className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs"
               >
                 <div>

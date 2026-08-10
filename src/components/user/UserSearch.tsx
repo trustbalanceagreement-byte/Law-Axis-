@@ -141,7 +141,7 @@ export const UserSearch: React.FC = () => {
           </button>
           {PRACTICE_AREAS.map((area, idx) => (
             <button
-              key={idx}
+              key={`search-area-${area}-${idx}`}
               onClick={() => setSelectedArea(area)}
               className={`px-3 py-1.5 rounded-lg font-bold shrink-0 transition-colors ${
                 selectedArea === area

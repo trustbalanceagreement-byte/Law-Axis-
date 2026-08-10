@@ -13,6 +13,7 @@ import {
   AppointmentStatus,
   UserProfileData,
   AppNotification,
+  LawyerDegreePhoto,
 } from '../types';
 import {
   INITIAL_LAWYERS,
@@ -109,6 +110,10 @@ interface AppContextType {
   startConversationWithLawyer: (lawyer: Lawyer) => string;
 
   updateLawyerProfile: (updated: Partial<Lawyer>) => void;
+  addDegreePhotoToLawyer: (lawyerId: string, photo: { title: string; imageUrl: string; category?: 'degree' | 'bar_license' | 'chamber' | 'court_photo' | 'other'; section?: 'highlight' | 'gallery' }) => void;
+  deleteDegreePhotoFromLawyer: (lawyerId: string, photoId: string) => void;
+  addDegreePhotoToUser: (photo: { title: string; imageUrl: string; category?: 'degree' | 'bar_license' | 'chamber' | 'court_photo' | 'other'; section?: 'highlight' | 'gallery' }) => void;
+  deleteDegreePhotoFromUser: (photoId: string) => void;
 
   toggleBookmark: (lawyerId: string) => void;
   bookmarkedLawyerIds: string[];
@@ -349,7 +354,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (data.consultationMode === 'chat') fee = data.lawyer.fees.chat;
 
     const newApp: Appointment = {
-      id: `app-${Date.now()}`,
+      id: `app-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       lawyerId: data.lawyer.id,
       lawyerName: data.lawyer.name,
       lawyerTitle: data.lawyer.title,
@@ -421,7 +426,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     consultationType?: string;
   }) => {
     const newRev: Review = {
-      id: `rev-${Date.now()}`,
+      id: `rev-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       lawyerId: data.lawyerId,
       userName: data.userName || 'Verified Client',
       rating: data.rating,
@@ -459,7 +464,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return existing.id;
     }
 
-    const newConvId = `conv-${Date.now()}`;
+    const newConvId = `conv-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const newConv: Conversation = {
       id: newConvId,
       lawyerId: lawyer.id,
@@ -480,7 +485,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...prev,
       [newConvId]: [
         {
-          id: `msg-${Date.now()}`,
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
           conversationId: newConvId,
           senderRole: 'user',
           text: 'Hello, I would like to seek legal consultation.',
@@ -510,7 +515,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const sendMessage = (conversationId: string, text: string, senderRole: 'user' | 'lawyer') => {
     const newMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       conversationId,
       senderRole,
       text,
@@ -548,7 +553,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const randomReply = autoReplies[Math.floor(Math.random() * autoReplies.length)];
 
         const replyMsg: ChatMessage = {
-          id: `msg-${Date.now() + 1}`,
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
           conversationId,
           senderRole: 'lawyer',
           text: randomReply,
@@ -586,6 +591,57 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLawyers((prev) =>
       prev.map((l) => (l.id === currentLawyerId ? { ...l, ...updated } : l))
     );
+  };
+
+  const addDegreePhotoToLawyer = (lawyerId: string, photo: { title: string; imageUrl: string; category?: 'degree' | 'bar_license' | 'chamber' | 'court_photo' | 'other'; section?: 'highlight' | 'gallery' }) => {
+    const newPhoto: LawyerDegreePhoto = {
+      ...photo,
+      id: `deg-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      uploadedAt: new Date().toISOString().split('T')[0],
+    };
+    setLawyers((prev) =>
+      prev.map((l) =>
+        l.id === lawyerId
+          ? { ...l, degreePhotos: [newPhoto, ...(l.degreePhotos || [])] }
+          : l
+      )
+    );
+  };
+
+  const deleteDegreePhotoFromLawyer = (lawyerId: string, photoId: string) => {
+    setLawyers((prev) =>
+      prev.map((l) =>
+        l.id === lawyerId
+          ? {
+              ...l,
+              degreePhotos: (l.degreePhotos || []).filter(
+                (p) => p.id !== photoId && p.imageUrl !== photoId
+              ),
+            }
+          : l
+      )
+    );
+  };
+
+  const addDegreePhotoToUser = (photo: { title: string; imageUrl: string; category?: 'degree' | 'bar_license' | 'chamber' | 'court_photo' | 'other'; section?: 'highlight' | 'gallery' }) => {
+    const newPhoto: LawyerDegreePhoto = {
+      ...photo,
+      id: `deg-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      uploadedAt: new Date().toISOString().split('T')[0],
+    };
+    setUserProfile((prev) => ({
+      ...prev,
+      degreePhotos: [newPhoto, ...(prev.degreePhotos || [])],
+    }));
+  };
+
+  const deleteDegreePhotoFromUser = (photoId: string) => {
+    setUserProfile((prev) => ({
+      ...prev,
+      degreePhotos: (prev.degreePhotos || []).filter(
+        (p) => p.id !== photoId && p.imageUrl !== photoId
+      ),
+    }));
   };
 
   return (
@@ -627,6 +683,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markConversationAsRead,
         startConversationWithLawyer,
         updateLawyerProfile,
+        addDegreePhotoToLawyer,
+        deleteDegreePhotoFromLawyer,
+        addDegreePhotoToUser,
+        deleteDegreePhotoFromUser,
         toggleBookmark,
         bookmarkedLawyerIds,
         t,

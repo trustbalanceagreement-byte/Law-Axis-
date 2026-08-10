@@ -28,6 +28,15 @@ export interface Review {
   verifiedClient: boolean;
 }
 
+export interface LawyerDegreePhoto {
+  id: string;
+  title: string;
+  imageUrl: string;
+  category?: 'degree' | 'bar_license' | 'chamber' | 'court_photo' | 'other';
+  section?: 'highlight' | 'gallery';
+  uploadedAt: string;
+}
+
 export interface Lawyer {
   id: string;
   name: string;
@@ -63,6 +72,7 @@ export interface Lawyer {
   };
   phone: string;
   email: string;
+  degreePhotos?: LawyerDegreePhoto[];
 }
 
 export type ConsultationMode = 'in_person' | 'video_call' | 'chat';
@@ -123,6 +133,7 @@ export interface UserProfileData {
   memberSince: string;
   occupation?: string;
   emergencyContact?: string;
+  degreePhotos?: LawyerDegreePhoto[];
 }
 
 export interface Conversation {

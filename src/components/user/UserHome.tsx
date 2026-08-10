@@ -93,7 +93,7 @@ export const UserHome: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {CATEGORIES.map((cat, idx) => (
             <div
-              key={idx}
+              key={`home-cat-${cat.name}-${idx}`}
               onClick={() => handleCategoryClick(cat.name)}
               className="group cursor-pointer p-3.5 rounded-xl bg-white border border-slate-200 hover:border-indigo-400 hover:shadow-xs transition-all text-left flex items-start gap-3"
             >

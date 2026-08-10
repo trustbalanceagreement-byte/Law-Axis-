@@ -189,11 +189,11 @@ export const UserChat: React.FC = () => {
                 </span>
               </div>
 
-              {activeMessages.map((msg) => {
+              {activeMessages.map((msg, idx) => {
                 const isUser = msg.senderRole === 'user';
                 return (
                   <div
-                    key={msg.id}
+                    key={`umsg-${msg.id || idx}-${idx}`}
                     className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                   >
                     <div
@@ -217,7 +217,7 @@ export const UserChat: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
               {QUICK_PROMPTS.map((prompt, idx) => (
                 <button
-                  key={idx}
+                  key={`qp-${prompt.slice(0, 10)}-${idx}`}
                   onClick={() => handleQuickPrompt(prompt)}
                   className="text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-md bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 text-slate-600 border border-slate-200 shrink-0 transition-colors"
                 >

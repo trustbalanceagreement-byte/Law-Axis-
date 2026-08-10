@@ -1,148 +1,91 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Scale, UserCheck, Briefcase, ShieldCheck, Search, MessageSquare, Star, ArrowRight, Languages } from 'lucide-react';
+import { User, Scale } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export const RoleSelectionGate: React.FC = () => {
-  const { setRole, language, setLanguage, t } = useApp();
+  const { setRole } = useApp();
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] text-slate-800 flex flex-col justify-between items-center p-4 md:p-8 relative overflow-hidden font-sans">
-      {/* Header Top Bar */}
-      <div className="w-full max-w-5xl flex justify-between items-center z-10 pt-2">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-indigo-900 rounded-lg flex items-center justify-center text-white shadow-xs">
-            <Scale className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-2xl font-black tracking-tight text-indigo-950">
-            LAW AXIS
-          </span>
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-4 relative overflow-hidden font-sans select-none">
+      {/* Background Dimmed Platform Preview */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden flex flex-col justify-between p-6 blur-[1px]">
+        <div className="flex justify-between items-center border-b border-slate-200 pb-4">
+          <div className="text-xl font-bold font-serif text-blue-900">Law Axis</div>
+          <div className="text-xs text-slate-500">Dhaka, Bangladesh</div>
         </div>
-
-        <button
-          onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all text-xs md:text-sm font-bold shadow-xs"
-        >
-          <Languages className="w-4 h-4 text-indigo-600" />
-          <span>{language === 'bn' ? 'English' : 'বাংলা'}</span>
-        </button>
+        <div className="max-w-xl mx-auto text-center my-auto space-y-4">
+          <div className="text-2xl font-extrabold text-slate-800">Find Top Lawyers</div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/80 p-4 rounded-xl border border-slate-200 text-slate-700">Adv. Mahbubur Rahman</div>
+            <div className="bg-white/80 p-4 rounded-xl border border-slate-200 text-slate-700">Adv. Sadia Islam</div>
+          </div>
+        </div>
       </div>
 
-      {/* Main Content Section */}
+      {/* Light Overlay Tint */}
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-50/80 via-white/90 to-slate-100/90 backdrop-blur-md" />
+
+      {/* Main Content Modal Box Container */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-4xl my-auto text-center z-10 py-8"
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center text-center px-4"
       >
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-bold mb-4">
-          <ShieldCheck className="w-4 h-4 text-indigo-600" />
-          <span>{t('আইনি পরামর্শ ও বিশ্বস্ত আইনজীবী প্ল্যাটফর্ম', 'Trusted Legal Consultation Platform')}</span>
+        {/* Brand Logo & Subtitle */}
+        <div className="mb-8 sm:mb-10 flex flex-col items-center">
+          <h1 className="text-4xl sm:text-5xl font-serif font-extrabold tracking-tight text-blue-950 drop-shadow-sm mb-2">
+            Law Axis
+          </h1>
+          <p className="text-xs sm:text-sm text-blue-700/80 font-medium tracking-wide">
+            Your Trusted Legal Partner
+          </p>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">
-          {t('আপনার আইনি প্রয়োজনে সঠিক সহযোগী', 'Your Legal Access Simplified')} <br />
-          <span className="text-indigo-600">{t('খুঁজুন সহজে ও সরাসরি', 'Find Advocates & Book Consultations')}</span>
-        </h1>
-
-        <p className="text-slate-600 text-sm md:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-          {t(
-            'লো অ্যাক্সিস-এ যেকোনো আইনি সমস্যায় সেরা আইনজীবীদের খুঁজুন, লাইভ চ্যাট ও সরাসরি অ্যাপয়েন্টমেন্ট বুক করুন।',
-            'LAW AXIS connects citizens with top advocates for instant advice, appointments, and live chat.'
-          )}
-        </p>
-
-        {/* Action Cards */}
-        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">
+        {/* 2 Role Selection Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 w-full max-w-xl">
           {/* Card 1: User Role */}
           <motion.div
-            whileHover={{ y: -3 }}
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setRole('user')}
-            className="group cursor-pointer p-6 sm:p-8 rounded-2xl bg-white border border-slate-200 hover:border-indigo-500 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+            className="cursor-pointer bg-white border border-slate-200/90 hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 rounded-2xl sm:rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all duration-200 group"
           >
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-5 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                <UserCheck className="w-6 h-6" />
-              </div>
-
-              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                {t('Go as a User', 'Go as a User')}
-              </h3>
-
-              <p className="text-slate-500 text-xs mb-5 leading-relaxed">
-                {t(
-                  'আইনজীবী সার্চ করুন, প্রোফাইল দেখুন, সরাসরি চ্যাট করুন ও অ্যাপয়েন্টমেন্ট বুকিং করুন।',
-                  'Search verified advocates, view detailed profiles, live chat, and book appointments.'
-                )}
-              </p>
-
-              <div className="space-y-2 mb-6 text-xs text-slate-600">
-                <div className="flex items-center gap-2">
-                  <Search className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>{t('অভিজ্ঞতা ও কোর্ট এলাকা অনুযায়ী ফিল্টার', 'Filter by Experience & Court Location')}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>{t('ইনস্ট্যান্ট লাইভ চ্যাট সুবিধা', 'Instant Live Messaging Support')}</span>
-                </div>
-              </div>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-700 mb-5 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-200 shadow-sm">
+              <User className="w-7 h-7 stroke-[1.75]" />
             </div>
 
-            <div className="w-full py-3 px-5 rounded-lg bg-slate-900 text-white font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors text-xs sm:text-sm shadow-xs">
-              <span>{t('Go as a User', 'Go as a User')}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 group-hover:text-blue-600 transition-colors">
+              Go as a User
+            </h3>
+
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+              Find Lawyers
+            </p>
           </motion.div>
 
           {/* Card 2: Lawyer Role */}
           <motion.div
-            whileHover={{ y: -3 }}
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setRole('lawyer')}
-            className="group cursor-pointer p-6 sm:p-8 rounded-2xl bg-white border border-slate-200 hover:border-indigo-500 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+            className="cursor-pointer bg-white border border-slate-200/90 hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 rounded-2xl sm:rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all duration-200 group"
           >
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-5 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                <Briefcase className="w-6 h-6" />
-              </div>
-
-              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                {t('Go as a Lawyer', 'Go as a Lawyer')}
-              </h3>
-
-              <p className="text-slate-500 text-xs mb-5 leading-relaxed">
-                {t(
-                  'আপনার অ্যাডভোকেট প্রোফাইল সাজান, নতুন ক্লায়েন্ট পান ও অনলাইন/চেম্বার অ্যাপয়েন্টমেন্ট পরিচালনা করুন।',
-                  'Manage your chamber, accept client bookings, manage chat inquiries and edit profile.'
-                )}
-              </p>
-
-              <div className="space-y-2 mb-6 text-xs text-slate-600">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>{t('চেম্বার ফি ও প্র্যাকটিস কোর্ট ম্যানেজমেন্ট', 'Manage Consultation Fees & Court Badges')}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>{t('অনলাইন / চেম্বার সময়সূচি কনফিগারেশন', 'Configure Online / Chamber Slots')}</span>
-                </div>
-              </div>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-700 mb-5 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-200 shadow-sm">
+              <Scale className="w-7 h-7 stroke-[1.75]" />
             </div>
 
-            <div className="w-full py-3 px-5 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors text-xs sm:text-sm shadow-xs">
-              <span>{t('Go as a Lawyer', 'Go as a Lawyer')}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 group-hover:text-blue-600 transition-colors">
+              Go as a Lawyer
+            </h3>
+
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+              Access Portal
+            </p>
           </motion.div>
         </div>
       </motion.div>
-
-      {/* Footer Branding */}
-      <div className="w-full max-w-5xl text-center text-slate-500 text-xs py-4 border-t border-slate-200 z-10 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <p>© {new Date().getFullYear()} LAW AXIS — Legal Access Simplified</p>
-        <p className="text-slate-600 font-medium">
-          {t('যেকোনো সময় উপরে সুইচ করে অন্য মোডে যেতে পারবেন', 'You can switch role anytime from the top bar')}
-        </p>
-      </div>
     </div>
   );
 };

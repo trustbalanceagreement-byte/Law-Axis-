@@ -175,7 +175,7 @@ export const BookingModal: React.FC = () => {
                     className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     {availableSlots.map((slot, idx) => (
-                      <option key={idx} value={slot}>
+                      <option key={`booking-slot-${slot}-${idx}`} value={slot}>
                         {slot}
                       </option>
                     ))}

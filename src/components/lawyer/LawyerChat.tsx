@@ -121,11 +121,11 @@ export const LawyerChat: React.FC = () => {
 
             {/* Messages Area */}
             <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 bg-slate-50 min-h-0">
-              {activeMessages.map((msg) => {
+              {activeMessages.map((msg, idx) => {
                 const isLawyer = msg.senderRole === 'lawyer';
                 return (
                   <div
-                    key={msg.id}
+                    key={`lmsg-${msg.id || idx}-${idx}`}
                     className={`flex flex-col ${isLawyer ? 'items-end' : 'items-start'}`}
                   >
                     <div

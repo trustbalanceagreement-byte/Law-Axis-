@@ -61,9 +61,9 @@ export const LawyerAppointments: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {lawyerApps.map((app) => (
+          {lawyerApps.map((app, idx) => (
             <div
-              key={app.id}
+              key={`lawyer-app-${app.id || idx}-${idx}`}
               className="bg-white p-5 rounded-2xl border border-slate-200 space-y-4 shadow-xs"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">

@@ -90,7 +90,7 @@ export const LawyerCard: React.FC<LawyerCardProps> = ({ lawyer }) => {
         <div className="flex flex-wrap gap-1.5 mb-3 max-w-full overflow-hidden">
           {lawyer.practiceAreas.slice(0, 3).map((area, idx) => (
             <span
-              key={idx}
+              key={`card-area-${lawyer.id}-${area}-${idx}`}
               className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100 max-w-full truncate"
             >
               {area}
